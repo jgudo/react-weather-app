@@ -128,6 +128,12 @@ export default class WeatherApp extends Component {
     }));
   }
 
+  onKeyStroke = (e) => {
+    if(e.keyCode == 13) {
+      this.onSearchWeather();
+    }
+  }
+
   displayCurrentTime = () => {
     try {
       const time = moment().tz(this.state.zoneName).format('LLL');
@@ -186,12 +192,16 @@ export default class WeatherApp extends Component {
                 <h1>React JS Weather App</h1>
                 <br/>
                 <div className="field-wrapper">
-                  <input type="text" 
-                      onChange={this.onSearchQueryChange}
-                      value={this.state.searchQuery}
-                      placeholder="Search for <City,Country>"
-                      className="form-control"
+                  <div className="text-field-wrapper">
+                    <input type="text" 
+                        onChange={this.onSearchQueryChange}
+                        value={this.state.searchQuery}
+                        placeholder="Search for <City,Country>"
+                        className="form-control"
+                        onKeyDown={this.onKeyStroke}
                     />
+                    <div></div>
+                  </div>
                     <button 
                       onClick={this.onSearchWeather}
                       className="form-control"
