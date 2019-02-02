@@ -3,8 +3,8 @@ import moment from 'moment';
 import 'moment-timezone';
 
 const owmEndPoint = 'http://api.openweathermap.org/data/2.5/weather?';
-const owmKey = '0743df22e80a3acb5f7cacb1f770cd88';
-const timezoneDbApiKey = 'JUAMIOMEPS49';
+const owmKey = process.env.OWM_KEY;
+const timezoneDbApiKey = process.env.TIMEZONE_DB_API_KEY;
 const timezoneDbEndpoint = `http://api.timezonedb.com/v2.1/get-time-zone?key=${timezoneDbApiKey}&format=json&by=position&`;
 const countryFlagsUrl = 'https://www.countryflags.io/';
 
@@ -159,7 +159,6 @@ export default class WeatherApp extends Component {
         }));
       }
 
-      console.log(weather);
     }
 
     try {
