@@ -235,15 +235,6 @@ export default class WeatherApp extends Component {
       </div>
     );
   }
-  //open weather api 0743df22e80a3acb5f7cacb1f770cd88
-  //current location http://ip-api.com/json
-  //owm zip based api.openweathermap.org/data/2.5/weather?zip=94040,us
-  //own lat-lon based api.openweathermap.org/data/2.5/weather?lat=35&lon=139
-  //owm city-country api.openweathermap.org/data/2.5/weather?q={city name}&units=metric
-  //api.openweathermap.org/data/2.5/weather?q={city name},{country code}
-  //owm-classes https://erikflowers.github.io/weather-icons/api-list.html
-  //owm docs https://openweathermap.org/current
-  //sample query http://api.openweathermap.org/data/2.5/weather?zip=2014,ph&APPID=0743df22e80a3acb5f7cacb1f770cd88&units=imperial
   
 }
 
