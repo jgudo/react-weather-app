@@ -1,0 +1,23 @@
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.6rem;
+    padding: $l-size;
+    background: $purple;
+    color: #fff;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+button:focus {
+    outline: none;
+}   
+
+input::placeholder {
+    color: rgba(255,255,255,.7) !important;
+}

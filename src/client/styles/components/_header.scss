@@ -1,0 +1,12 @@
+.app-header {
+  text-align: left;
+  margin-bottom: $xl-size;
+}
+
+.field-wrapper {
+  display: flex;
+
+  input {
+    flex-grow: 1;
+  }
+}

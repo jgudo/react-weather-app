@@ -1,0 +1,146 @@
+.app-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 64rem;
+  margin: auto;
+  margin-top: $s-size;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 30px;
+    height: 30px;
+    margin-left: $m-size;
+
+  }
+}
+
+.wrapper  { 
+  display: flex;
+  padding: $xl-size;
+  text-align: left;
+  flex-direction: column;
+  width: inherit;
+  padding-top: 0;
+ 
+}
+
+.location {
+  display: flex;
+  border-bottom: 1px solid rgba(255,255,255,.2);
+}
+
+.weather {
+  display: flex;
+  align-items: center;
+  margin-top: $xl-size;
+
+  i {
+    font-size: 15rem;
+    flex-grow: 1;
+  }
+
+}
+
+.temperature-info {
+  flex-grow: 1;
+  margin-bottom: $m-size;
+  position: relative;
+
+  h1 {
+    font-size: $xl-size;
+  }
+}
+
+.temperature-control {
+  position: absolute;
+  top: 0;
+  right: $s-size;
+  display: flex;
+  align-items: center;
+  span {
+    padding: 0 $s-size;
+  }
+
+  span:first-child {
+    opacity: 1;
+  }
+  span:last-child {
+    opacity: .5;
+  }
+}
+
+.temperature-toggle {
+  width: 40px;
+  height: 20px;
+  border-radius: 20px;
+  background: rgba(0,0,0,.2);
+  position: relative;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.toggle-ball {
+  width: 20px;
+  height: 20px;
+  transform: translateX(0);
+  background: $red;
+  border-radius: 50%;
+  position: absolute;
+  transition: all .2s ease;
+}
+
+.temperature-control.isFahrenheit {
+
+  .toggle-ball {
+    transform: translateX(100%);
+  }
+
+  span:first-child {
+    opacity: .5;
+  }
+  span:last-child {
+    opacity: 1;
+  }
+}
+
+
+.display-time {
+  h2 {
+    margin-bottom: 5px;
+  }
+  span {
+    font-size: 12px;
+  }
+}
+
+.form-control {
+  background: none;
+  color: #fff;
+  border: none;
+
+  &:focus {
+    outline: none;
+  }
+
+
+}
+
+
+input {
+  padding-bottom: $s-size;
+  border-bottom: 2px solid #fff !important;
+}
+
+button {
+  margin: 0 $l-size;
+  font-size: 3rem;
+
+}
