@@ -71,6 +71,7 @@ export default class WeatherApp extends Component {
         this.displayCurrentTime();
       }
     };
+
     try {
       this.setCountryCode();
       fetchUserLocation();
@@ -125,7 +126,7 @@ export default class WeatherApp extends Component {
   };
 
   onSearchQueryChange = (e) => {
-    let input = e.target.value;
+    let input = e.target.value.toLowerCase().trimStart();
     this.setState(() => ({
       searchQuery: input
     }));
@@ -151,27 +152,31 @@ export default class WeatherApp extends Component {
     this.setState(() => ({ searchQuery: '' }));
     const searchCityWeather = async () => {
       const weatherRequest = await fetch(`${owmEndPoint}q=${this.state.searchQuery}&units=metric&APPID=${owmKey}`);
-      const weather = await weatherRequest.json();
+      if(weatherRequest.status == 200) {
+        const weather = await weatherRequest.json();
 
-      if(weather.cod == 200) {
-        this.setCurrentWeather(weather, weather.name);
-        this.displayCurrentTime();
-        const timeZone = await this.setCurrentTime(weather.coord.lat, weather.coord.lon);
-        this.setState(() => ({ 
-          gmtOffset: timeZone.gmtOffset,
-          dateAndTime: timeZone.formatted,
-          zoneName: timeZone.zoneName 
-        }));
-      } else if(weather.cod == 404) {
+        if(weather.cod == 200) {
+          this.setCurrentWeather(weather, weather.name);
+          this.displayCurrentTime();
+          const timeZone = await this.setCurrentTime(weather.coord.lat, weather.coord.lon);
+          this.setState(() => ({ 
+            gmtOffset: timeZone.gmtOffset,
+            dateAndTime: timeZone.formatted,
+            zoneName: timeZone.zoneName 
+          }));
+        }
+      }
+      else {
         this.setState(() => ({
           searchStatus: 'City not found'
         }));
       }
-
     }
 
     try {
-      searchCityWeather();
+      if(this.state.searchQuery.length !== 0) {
+        searchCityWeather();
+      }
     } catch(e) {
       console.log('Unabled to fetch weather');
     } 
