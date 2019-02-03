@@ -2,10 +2,12 @@ import React, {Component} from 'react';
 import moment from 'moment';
 import 'moment-timezone';
 
-const owmEndPoint = 'http://api.openweathermap.org/data/2.5/weather?';
+const owmEndPoint = 'https://api.openweathermap.org/data/2.5/weather?';
 const owmKey = process.env.OWM_KEY;
 const timezoneDbApiKey = process.env.TIMEZONE_DB_API_KEY;
-const timezoneDbEndpoint = `http://api.timezonedb.com/v2.1/get-time-zone?key=${timezoneDbApiKey}&format=json&by=position&`;
+const ipdataApiKey = process.env.IPDATA_API_KEY;
+const ipdataEndpoint = `https://api.ipdata.co/?api-key=${ipdataApiKey}`
+const timezoneDbEndpoint = `https://api.timezonedb.com/v2.1/get-time-zone?key=${timezoneDbApiKey}&format=json&by=position&`;
 const countryFlagsUrl = 'https://www.countryflags.io/';
 
 const wiIcons = {
@@ -79,7 +81,7 @@ export default class WeatherApp extends Component {
   }
 
   fetchCurrentLocation = async () => {
-    const requestLocation = await fetch('http://ip-api.com/json');
+    const requestLocation = await fetch(ipdataEndpoint);
     return await requestLocation.json();
   }
 
