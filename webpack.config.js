@@ -45,7 +45,7 @@ module.exports = (env) => {
       new webpack.DefinePlugin({
         'process.env.OWM_KEY':JSON.stringify(process.env.OWM_KEY),
         'process.env.TIMEZONE_DB_API_KEY':JSON.stringify(process.env.TIMEZONE_DB_API_KEY),
-
+        'process.env.IPDATA_API_KEY':JSON.stringify(process.env.IPDATA_API_KEY)
     })
     ],
     devtool: isProduction ? 'source-map' : 'inline-source-map',
