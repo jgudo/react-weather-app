@@ -22,6 +22,11 @@
 
   .weather {
     flex-direction: column;
+    margin-top: $xl-size;
+
+    i {
+      font-size: 10rem;
+    }
   }
 
 }
