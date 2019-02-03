@@ -1,0 +1,27 @@
+@media (max-width: 425px) {
+  
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  button {
+    font-size: 2rem;
+    margin: 0 $m-size;
+  }
+  .app-content {
+    width: 100%;
+  }
+
+  .temperature-info {
+    width: 100%;
+  }
+
+  .temperature-control {
+    top: $xl-size;
+  }
+
+  .weather {
+    flex-direction: column;
+  }
+
+}

@@ -52,7 +52,6 @@ export default class WeatherApp extends Component {
   };
 
   componentWillMount() {
-    this.setCountryCode();
     const fetchUserLocation = async () => {
       const data =  await this.fetchCurrentLocation();
       
@@ -71,8 +70,12 @@ export default class WeatherApp extends Component {
         this.displayCurrentTime();
       }
     };
-
-    fetchUserLocation();
+    try {
+      this.setCountryCode();
+      fetchUserLocation();
+    } catch(e) {
+      console.log('An error occured');
+    }
   }
 
   fetchCurrentLocation = async () => {
@@ -81,7 +84,6 @@ export default class WeatherApp extends Component {
   }
 
   setCountryCode = async () => {
-
     if('localStorage' in window) {
        if(localStorage.countryCode) {
          const getCountryCode = localStorage.getItem('countryCode');
