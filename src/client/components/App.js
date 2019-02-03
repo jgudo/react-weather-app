@@ -56,8 +56,7 @@ export default class WeatherApp extends Component {
   componentWillMount() {
     const fetchUserLocation = async () => {
       const data =  await this.fetchCurrentLocation();
-      
-      const tempRequest = await fetch(`${owmEndPoint}lat=${data.lat}&lon=${data.lon}&APPID=${owmKey}&units=metric`);
+      const tempRequest = await fetch(`${owmEndPoint}lat=${data.latitude}&lon=${data.longitude}&APPID=${owmKey}&units=metric`);
       const temp = await tempRequest.json();  
       
 
