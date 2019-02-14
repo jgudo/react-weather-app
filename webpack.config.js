@@ -1,6 +1,7 @@
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const webpack = require('webpack');
+const workboxPlugin = require('workbox-webpack-plugin');
 const DotEnv = require('dotenv');
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -42,6 +43,13 @@ module.exports = (env) => {
     },
     plugins: [
       CSSExtract,
+      new workboxPlugin.GenerateSW({
+        cacheId: 'react-weather-app',
+        swDest: 'sw.js',
+        navigateFallback: '/index.html',
+        clientsClaim: true,
+        skipWaiting: true
+      }),
       new webpack.DefinePlugin({
         'process.env.OWM_KEY':JSON.stringify(process.env.OWM_KEY),
         'process.env.TIMEZONE_DB_API_KEY':JSON.stringify(process.env.TIMEZONE_DB_API_KEY),
