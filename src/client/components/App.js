@@ -191,7 +191,6 @@ export default class WeatherApp extends Component {
 
   render() {
 
-
     return(
       <div className="container">
         <div className="app-content">
