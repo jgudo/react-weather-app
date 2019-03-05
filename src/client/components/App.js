@@ -196,6 +196,7 @@ export default class WeatherApp extends Component {
   };
 
   render() {
+<<<<<<< HEAD
     if (this.state.loaded) {
       return (
         <div className={this.state.loaded ? 'container loaded' : null}>
@@ -217,6 +218,22 @@ export default class WeatherApp extends Component {
                     </div>
                       <button 
                         onClick={this.onSearchWeather}
+=======
+
+    return(
+      <div className="container">
+        <div className="app-content">
+            <div className="wrapper">
+              <div className="app-header">
+                <h1>React JS Weather App</h1>
+                <br/>
+                <div className="field-wrapper">
+                  <div className="text-field-wrapper">
+                    <input type="text" 
+                        onChange={this.onSearchQueryChange}
+                        value={this.state.searchQuery}
+                        placeholder="Search for <City,Country>"
+>>>>>>> 341510b1025b515d1088e9da742252c0c718e740
                         className="form-control"
                       >
                         Search

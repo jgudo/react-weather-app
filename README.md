@@ -1,3 +1,3 @@
 # Live Demo 
 
-visit live demo at <https://simple-weather-react-app.herokuapp.com/>
+visit live demo at <https://kaulapan.netlify.com/>
