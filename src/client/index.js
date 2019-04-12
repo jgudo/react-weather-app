@@ -13,7 +13,7 @@ WebFont.load({
   }
 });
 
-if ('serviceWorker' in navigator) {
+if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').then((registration) => {
     console.log('SW registered: ', registration);
   }).catch((registrationError) => {
@@ -21,6 +21,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-ReactDOM.render(<WeatherApp />, document.getElementById('root'));
+ReactDOM.render(<WeatherApp />, document.getElementById('app'));
 
 
