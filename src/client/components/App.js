@@ -3,10 +3,13 @@ import moment from 'moment';
 import 'moment-timezone';
 
 import WeatherIcon from './WeatherIcon';
+import DailyForecast from './DailyForecast';
 
 import { 
   fetchCountryCode, 
-  fetchWeather, 
+  fetchWeather,
+  fetchLocationKey,
+  fetchForecast, 
   getTimezone,
   fetchCurrentLocationAndWeather
 } from '../api/api';
@@ -28,7 +31,7 @@ export default class WeatherApp extends Component {
     searchQuery: '',
     searchStatus: undefined,
     countryCode: {},
-    gmtOffset: '',
+    forecast:[],
     displayTime: '',
     zoneName: '',
     isSearching: false,
@@ -46,14 +49,13 @@ export default class WeatherApp extends Component {
 
   fetchUserLocation = async () => {
     const data = await fetchCurrentLocationAndWeather();
-    const timezone = await getTimezone(data.weather.coord.lat, data.weather.coord.lon);
+    const forecast = await fetchForecast(data.weather.coord.lat, data.weather.coord.lon);
 
     this.setCurrentWeather(data.weather, data.location.city);
     
     this.setState({ 
-      gmtOffset: timezone.gmtOffset,
-      dateAndTime: timezone.formatted,
-      zoneName: timezone.zoneName,
+      forecast: forecast.data,
+      zoneName: forecast.timezone,
       loaded: true 
     });
 
@@ -111,7 +113,7 @@ export default class WeatherApp extends Component {
   // Display current time based on timezone
   displayCurrentTime = () => {
     if (this.state.zoneName) {
-      const time = moment().tz(this.state.zoneName).format('LLL');
+      const time = moment().tz(this.state.zoneName).format('LLLL');
       this.setState({ displayTime: time });
     }
   }
@@ -121,14 +123,13 @@ export default class WeatherApp extends Component {
     try {
       const { searchQuery } = this.state;
       const weather = await fetchWeather(undefined, undefined, searchQuery);
-      const timezone = await getTimezone(weather.coord.lat, weather.coord.lon);
-        
+      const forecast = await fetchForecast(weather.coord.lat, weather.coord.lon);
+
       this.setCurrentWeather(weather, weather.name);
       this.displayCurrentTime();
       this.setState({ 
-        gmtOffset: timezone.gmtOffset,
-        dateAndTime: timezone.formatted,
-        zoneName: timezone.zoneName 
+        forecast: forecast.data,
+        zoneName: forecast.timezone 
       });
     } catch (e) {
       this.setState({ searchStatus: 'City not found' });
@@ -147,10 +148,8 @@ export default class WeatherApp extends Component {
   };
 
   // Celcius/Fahrenheit toggler
-  onControlClick = () => {
-    const ball = this.toggleBall;
+  onToggleFahrenheit = () => {
     this.setState({ isCelcius: !this.state.isCelcius });
-    ball.classList.toggle('isFahrenheit');
   };
 
   /* eslint-disable no-return-assign */
@@ -170,6 +169,7 @@ export default class WeatherApp extends Component {
       displayTime,
       weatherIconCode,
       searchStatus,
+      forecast,
       isSearching
     } = this.state;
     const countryFlagsUrl = 'https://www.countryflags.io/';
@@ -179,64 +179,69 @@ export default class WeatherApp extends Component {
         {loaded ? (
           <div className={loaded ? 'container loaded' : null}>
             <div className="app-content">
-              <div className="wrapper">
-                <div className="app-header">
-                  <h1>React JS Weather App</h1>
-                  <br/>
-                  <div className="field-wrapper">
-                    <div className="text-field-wrapper">
-                      <input 
-                          className="form-control"
-                          onChange={this.onSearchQueryChange}
-                          onKeyDown={this.onKeyStroke}
-                          placeholder="Search for <City,Country>"
-                          type="text" 
-                          value={searchQuery}
-                      />
-                    </div>
-                    <button 
+              <div className="app-header">
+                <h1>React JS Weather App</h1>
+                <br/>
+                <div className="field-wrapper">
+                  <div className="text-field-wrapper">
+                    <input 
                         className="form-control"
-                        onClick={this.onSearchWeather}
-                    >
-                      Search
-                    </button>
+                        onChange={this.onSearchQueryChange}
+                        onKeyDown={this.onKeyStroke}
+                        placeholder="Search for <City,Country>"
+                        type="text" 
+                        value={searchQuery}
+                    />
                   </div>
+                  <button 
+                      className="form-control"
+                      onClick={this.onSearchWeather}
+                  >
+                    Search
+                  </button>
                 </div>
+              </div>
+              <div className="wrapper">
                 {!isSearching ? (
-                  <div>
-                    <div className="location">
-                      <h3>{city}, {countryCode[country]}</h3>
-                      <img src={`${countryFlagsUrl}/${country}/shiny/64.png`} alt=""/>
-                    </div>
+                  <React.Fragment>
                     <div className="weather">
-                      <WeatherIcon iconCode={weatherIconCode} />
+                      <div className="weather-wrapper">
+                        <WeatherIcon iconCode={weatherIconCode} />
+                        <div className="temperature-control">
+                          <h1 className="weather-temp">
+                            {isCelcius ? `${tempCelcius} °C` : `${tempFahrenheit} °F`} 
+                          </h1>
+                            <div 
+                                className="temperature-toggle" 
+                                onClick={this.onToggleFahrenheit}
+                                style={{
+                                  color: isCelcius ? 'rgba(255, 255, 255, .7)' : '#adff2f'
+                                }}
+                            >
+                              <span>°F</span>
+                            </div>
+                        </div>
+                      </div>
                       <div className="temperature-info">
-                        <h1>{isCelcius ? `${tempCelcius} °C` : `${tempFahrenheit} °F`} </h1>
+                        <div className="location">
+                          <h3>{city}, {countryCode[country]}</h3>
+                          <img src={`${countryFlagsUrl}/${country}/shiny/64.png`} alt=""/>
+                        </div>
                         <h4 style={{textTransform: 'capitalize'}}>
                           Weather: {weatherDescription}
                         </h4>
                         <h4>Wind Speed: {windSpeed} km/h</h4>
                         <h4>Humidity: {humidity}%</h4>
-                        <div className="display-time">
-                          <h2>{displayTime}</h2>
-                          <span>{city}'s current date and time</span>
-                        </div>
-                        <div 
-                            className="temperature-control" 
-                            ref={node => this.toggleBall = node}
-                        >
-                          <span>°C</span>
-                            <div 
-                                className="temperature-toggle" 
-                                onClick={this.onControlClick}
-                            >
-                              <div className="toggle-ball"/>
-                            </div>
-                          <span>°F</span>
-                        </div>
+                        <h4>{displayTime}</h4>
                       </div>
                     </div>
-                  </div>
+                    {forecast.length !== 0 && (
+                      <DailyForecast 
+                          forecast={forecast} 
+                          isCelcius={isCelcius}
+                      />
+                    )}
+                  </React.Fragment>
                 ) : (
                   <div></div>
                 )}

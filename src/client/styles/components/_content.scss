@@ -1,9 +1,9 @@
 .app-content {
+  width: 70%;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  width: 64rem;
   margin: auto;
   margin-top: $s-size;
 }
@@ -20,11 +20,12 @@
   }
 }
 
-.wrapper  { 
+.wrapper { 
+  width: 100% !important;
   display: flex;
+  flex-direction: column;
   padding: $xl-size;
   text-align: left;
-  flex-direction: column;
   width: inherit;
   padding-top: 0;
  
@@ -36,6 +37,7 @@
 }
 
 .weather {
+  width: 100%;
   display: flex;
   align-items: center;
   margin-top: $m-size;
@@ -44,74 +46,54 @@
     font-size: 15rem;
     flex-grow: 1;
   }
+}
 
+.weather-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding-right: $xxl-size;
+  text-align: center;
+  position: relative;
+}
+
+.weather-temp {
+  font-size: $xl-size;
 }
 
 .temperature-info {
   flex-grow: 1;
   margin-bottom: $m-size;
   position: relative;
-
-  h1 {
-    font-size: $xl-size;
-  }
+  padding-left: $xl-size;
 }
 
 .temperature-control {
-  position: absolute;
-  top: 0;
-  right: $s-size;
-  display: flex;
-  align-items: center;
+  position: relative;
+  text-align: right;
+
   span {
     padding: 0 $s-size;
-  }
-
-  span:first-child {
-    opacity: 1;
-  }
-  span:last-child {
-    opacity: .5;
   }
 }
 
 .temperature-toggle {
-  width: 40px;
-  height: 20px;
-  border-radius: 20px;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
   background: rgba(0,0,0,.2);
-  position: relative;
+  position: absolute;
+  top: 20px;
+  right: -30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 1px solid rgba(255, 255, 255, .2);
 
   &:hover {
     cursor: pointer;
   }
 }
-
-.toggle-ball {
-  width: 20px;
-  height: 20px;
-  transform: translateX(0);
-  background: $red;
-  border-radius: 50%;
-  position: absolute;
-  transition: all .2s ease;
-}
-
-.temperature-control.isFahrenheit {
-
-  .toggle-ball {
-    transform: translateX(100%);
-    background: greenyellow;
-  }
-
-  span:first-child {
-    opacity: .5;
-  }
-  span:last-child {
-    opacity: 1;
-  }
-}
-
 
 .display-time {
   h2 {
@@ -166,4 +148,40 @@ button {
   margin: 0 $l-size;
   font-size: 3rem;
 
+}
+
+.forecast {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: $xl-size;
+}
+
+.forecast__item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, .1);
+
+  i {
+    font-size: $icon-l;
+  }
+}
+
+.forecast__item:last-child {
+  border: none;
+}
+
+.forecast-date {
+  font-weight: normal;
+  margin-bottom: 0;
+}
+
+.forecast-temp {
+  span {
+    font-weight: normal;
+  }
 }

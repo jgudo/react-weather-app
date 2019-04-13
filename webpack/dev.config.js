@@ -13,7 +13,8 @@ module.exports = merge(baseConfig, {
     publicPath: '/',
     historyApiFallback: true,
     clientLogLevel: 'warning',
-    compress: true
+    compress: true,
+    disableHostCheck: true
   },
   plugins: [
     new HtmlWebpackPlugin({

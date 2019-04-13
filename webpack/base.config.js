@@ -87,7 +87,9 @@ module.exports = {
       'process.env.OWM_KEY':JSON.stringify(process.env.OWM_KEY),
       'process.env.TIMEZONE_DB_API_KEY':JSON.stringify(process.env.TIMEZONE_DB_API_KEY),
       'process.env.IPDATA_API_KEY':JSON.stringify(process.env.IPDATA_API_KEY),
-      'process.env.ACCU_KEY':JSON.stringify(process.env.ACCU_KEY)
+      'process.env.ACCU_KEY':JSON.stringify(process.env.ACCU_KEY),
+      'process.env.DARKSKY_API_KEY':JSON.stringify(process.env.DARKSKY_API_KEY),
+      'process.env.WEATHERBIT_KEY':JSON.stringify(process.env.WEATHERBIT_KEY)
     })
   ]
 };
