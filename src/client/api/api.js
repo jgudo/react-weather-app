@@ -1,6 +1,5 @@
 const owmKey = process.env.OWM_KEY;
 const accuKey = process.env.ACCU_KEY;
-const darkSkyKey = process.env.DARKSKY_API_KEY;
 const ipdataApiKey = process.env.IPDATA_API_KEY;
 const timezoneDbApiKey = process.env.TIMEZONE_DB_API_KEY;
 const weatherbitKey = process.env.WEATHERBIT_KEY;
@@ -8,7 +7,6 @@ const accuWeather = 'http://dataservice.accuweather.com/';
 const countryCodeEndpoint = 'https://raw.githubusercontent.com/jgudo/react-weather-app/master/static/country-code.json';
 const ipdataEndpoint = `https://api.ipdata.co/?api-key=${ipdataApiKey}`;
 const owmEndPoint = 'https://api.openweathermap.org/data/2.5/weather?';
-const darkSkyForecast = `https://api.darksky.net/forecast/${darkSkyKey}/`
 const weatherbitForecast = 'https://api.weatherbit.io/v2.0/forecast/daily?';
 const timezoneDbEndpoint = `https://api.timezonedb.com/v2.1/get-time-zone?key=${timezoneDbApiKey}&format=json&by=position&`;
 

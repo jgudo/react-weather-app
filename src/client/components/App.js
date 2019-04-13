@@ -8,9 +8,7 @@ import DailyForecast from './DailyForecast';
 import { 
   fetchCountryCode, 
   fetchWeather,
-  fetchLocationKey,
   fetchForecast, 
-  getTimezone,
   fetchCurrentLocationAndWeather
 } from '../api/api';
 
@@ -63,19 +61,19 @@ export default class WeatherApp extends Component {
   };
 
   // Fetch country code json file
-  setCountryCode = () => {
-    if ('localStorage' in window) {
-      if (localStorage.countryCode) {
+  setCountryCode = async () => {
+    if ('localStorage' in window && localStorage.countryCode) {
+      if (Object.keys(localStorage.countryCode).length === 0) {
         const countryCodeStore = JSON.parse(localStorage.getItem('countryCode'));
         this.setState(() => ({ countryCode: countryCodeStore }));
       } else {
-        const countryCode = fetchCountryCode();
+        const countryCode = await fetchCountryCode();
         localStorage.setItem('countryCode', JSON.stringify(countryCode));
 
         this.setState(() => ({ countryCode }));
       }
-    }
-  }
+    } 
+  };
 
   setCurrentWeather = (data, city) => {
     this.setState({
@@ -104,7 +102,7 @@ export default class WeatherApp extends Component {
   }
 
   // Trigger weather search on enter
-  onKeyStroke = (e) => {
+  onKeyEnter = (e) => {
     if(e.keyCode == 13) {
       this.onSearchWeather();
     }
@@ -187,7 +185,7 @@ export default class WeatherApp extends Component {
                     <input 
                         className="form-control"
                         onChange={this.onSearchQueryChange}
-                        onKeyDown={this.onKeyStroke}
+                        onKeyDown={this.onKeyEnter}
                         placeholder="Search for <City,Country>"
                         type="text" 
                         value={searchQuery}
@@ -218,21 +216,21 @@ export default class WeatherApp extends Component {
                                   color: isCelcius ? 'rgba(255, 255, 255, .7)' : '#adff2f'
                                 }}
                             >
-                              <span>°F</span>
+                              <span>{isCelcius ? '°F' : '°C' }</span>
                             </div>
                         </div>
                       </div>
                       <div className="temperature-info">
                         <div className="location">
-                          <h3>{city}, {countryCode[country]}</h3>
+                          <h2>{city}, {countryCode[country]}</h2>
                           <img src={`${countryFlagsUrl}/${country}/shiny/64.png`} alt=""/>
                         </div>
                         <h4 style={{textTransform: 'capitalize'}}>
-                          Weather: {weatherDescription}
+                          <span>Weather:</span> {weatherDescription}
                         </h4>
-                        <h4>Wind Speed: {windSpeed} km/h</h4>
-                        <h4>Humidity: {humidity}%</h4>
-                        <h4>{displayTime}</h4>
+                        <h4><span>Wind Speed:</span> {windSpeed} km/h</h4>
+                        <h4><span>Humidity:</span> {humidity}%</h4>
+                        <h4><span>Date:</span> {displayTime}</h4>
                       </div>
                     </div>
                     {forecast.length !== 0 && (
