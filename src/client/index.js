@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import WebFont from 'webfontloader';
 import WeatherApp from './components/App';
 
 import 'normalize.css/normalize.css';
 import './styles/style.scss';
-//import 'weather-icons/css/weather-icons.min.css';
-import WebFont from 'webfontloader';
+// import 'weather-icons/css/weather-icons.min.css';
 
 WebFont.load({
   google: {
@@ -22,5 +22,3 @@ if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
 }
 
 ReactDOM.render(<WeatherApp />, document.getElementById('app'));
-
-

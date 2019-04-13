@@ -1,38 +1,17 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import moment from 'moment';
 import 'moment-timezone';
 
-const owmEndPoint = 'https://api.openweathermap.org/data/2.5/weather?';
-const owmKey = process.env.OWM_KEY;
-const timezoneDbApiKey = process.env.TIMEZONE_DB_API_KEY;
-const ipdataApiKey = process.env.IPDATA_API_KEY;
-const ipdataEndpoint = `https://api.ipdata.co/?api-key=${ipdataApiKey}`;
-const timezoneDbEndpoint = `https://api.timezonedb.com/v2.1/get-time-zone?key=${timezoneDbApiKey}&format=json&by=position&`;
-const countryFlagsUrl = 'https://www.countryflags.io/';
+import WeatherIcon from './WeatherIcon';
 
-const wiIcons = {
-  "01d": "wi-day-sunny",
-  "01n": "wi-night-clear",
-  "02d": "wi-day-sunny-overcast",
-  "02n": "wi-night-alt-partly-cloudy",
-  "03d": "wi-day-cloudy",
-  "03n": "wi-night-alt-cloudy",
-  "04d": "wi-day-cloudy-high",
-  "04n": "wi-night-alt-cloudy-high",
-  "09d": "wi-day-sprinkle",
-  "09n": "wi-night-alt-sprinkle",
-  "10d": "wi-day-rain",
-  "10n": "wi-night-alt-rain",
-  "11d": "wi-day-thunderstorm",
-  "11n": "wi-night-alt-thunderstorm",
-  "13d": "wi-day-snow",
-  "13n": "wi-night-alt-snow",
-  "50d": "wi-day-fog",
-  "50n": "wi-night-fog"
-};
+import { 
+  fetchCountryCode, 
+  fetchWeather, 
+  getTimezone,
+  fetchCurrentLocationAndWeather
+} from '../api/api';
 
 export default class WeatherApp extends Component {
-
   state = {
     country: '',
     city: '',
@@ -51,6 +30,8 @@ export default class WeatherApp extends Component {
     countryCode: {},
     gmtOffset: '',
     displayTime: '',
+    zoneName: '',
+    isSearching: false,
     loaded: false
   };
 
@@ -58,54 +39,45 @@ export default class WeatherApp extends Component {
     try {
       this.setCountryCode();
       this.fetchUserLocation();
-    } catch(e) {
+    } catch (e) {
       console.log('An error occured', e);
     }
   }
 
   fetchUserLocation = async () => {
-    const currentLocation =  await this.fetchCurrentLocation();
-    const weatherRequest = await fetch(`${owmEndPoint}lat=${currentLocation.latitude}&lon=${currentLocation.longitude}&APPID=${owmKey}&units=metric`);
-    const weather = await weatherRequest.json();  
+    const data = await fetchCurrentLocationAndWeather();
+    const timezone = await getTimezone(data.weather.coord.lat, data.weather.coord.lon);
+
+    this.setCurrentWeather(data.weather, data.location.city);
     
-    if (weather.cod === 200) {
-      const timeZone = await this.setCurrentTime(weather.coord.lat, weather.coord.lon);
-      
-      this.setCurrentWeather(weather, currentLocation.city);
-      this.displayCurrentTime();
-      this.setState(() => ({ 
-        gmtOffset: timeZone.gmtOffset,
-        dateAndTime: timeZone.formatted,
-        zoneName: timeZone.zoneName,
-        loaded: true 
-      }));
-    }
+    this.setState({ 
+      gmtOffset: timezone.gmtOffset,
+      dateAndTime: timezone.formatted,
+      zoneName: timezone.zoneName,
+      loaded: true 
+    });
+
+    this.displayCurrentTime();
   };
 
-  fetchCurrentLocation = async () => {
-    const requestLocation = await fetch(ipdataEndpoint);
-    return await requestLocation.json();
-  }
-
   // Fetch country code json file
-  setCountryCode = async () => {
+  setCountryCode = () => {
     if ('localStorage' in window) {
-       if(localStorage.countryCode) {
-         const countryCode = JSON.parse(localStorage.getItem('countryCode'));
-         this.setState(() => ({ countryCode }));
-       } else {
-          const requestCountryCode = await fetch('/country-code.json');
-          const countryCode = await requestCountryCode.json();
-          localStorage.setItem('countryCode', JSON.stringify(countryCode));
+      if (localStorage.countryCode) {
+        const countryCodeStore = JSON.parse(localStorage.getItem('countryCode'));
+        this.setState(() => ({ countryCode: countryCodeStore }));
+      } else {
+        const countryCode = fetchCountryCode();
+        localStorage.setItem('countryCode', JSON.stringify(countryCode));
 
-          this.setState(() => ({countryCode}));
-       }
+        this.setState(() => ({ countryCode }));
+      }
     }
   }
 
   setCurrentWeather = (data, city) => {
-    this.setState(() => ({
-      city: city,
+    this.setState({
+      city,
       country: data.sys.country,
       lat: data.coord.lat,
       lon: data.coord.lon,
@@ -116,15 +88,10 @@ export default class WeatherApp extends Component {
       windSpeed: data.wind.speed,
       weatherDescription: data.weather[0].description,
       weatherIconCode: data.weather[0].icon,
-      searchStatus: undefined
-    }));
+      searchStatus: undefined,
+      isSearching: false 
+    });
   }
-
-  // Http request for getting timezone of country
-  setCurrentTime = async(lat, lon) => {
-    const requestTimeZone = await fetch(`${timezoneDbEndpoint}&lat=${lat}&lng=${lon}`);
-    return await requestTimeZone.json();
-  };
 
   // Search query handler
   onSearchQueryChange = (e) => {
@@ -143,107 +110,127 @@ export default class WeatherApp extends Component {
 
   // Display current time based on timezone
   displayCurrentTime = () => {
-    try {
+    if (this.state.zoneName) {
       const time = moment().tz(this.state.zoneName).format('LLL');
-      this.setState(() => ({ displayTime: time }));
-    } catch(e) {
-      console.log('cannot set time for', this.state.zoneName);
-    }  
+      this.setState({ displayTime: time });
+    }
   }
 
   // Http request Search <city,country> current weather
   searchCityWeather = async () => {
-    const weatherRequest = await fetch(`${owmEndPoint}q=${this.state.searchQuery}&units=metric&APPID=${owmKey}`);
-    if (weatherRequest.status === 200) {
-      const weather = await weatherRequest.json();
-
-      if (weather.cod === 200) {
-        const timeZone = await this.setCurrentTime(weather.coord.lat, weather.coord.lon);
-       
-        this.setCurrentWeather(weather, weather.name);
-        this.displayCurrentTime();
-        this.setState(() => ({ 
-          gmtOffset: timeZone.gmtOffset,
-          dateAndTime: timeZone.formatted,
-          zoneName: timeZone.zoneName 
-        }));
-      }
+    try {
+      const { searchQuery } = this.state;
+      const weather = await fetchWeather(undefined, undefined, searchQuery);
+      const timezone = await getTimezone(weather.coord.lat, weather.coord.lon);
+        
+      this.setCurrentWeather(weather, weather.name);
+      this.displayCurrentTime();
+      this.setState({ 
+        gmtOffset: timezone.gmtOffset,
+        dateAndTime: timezone.formatted,
+        zoneName: timezone.zoneName 
+      });
+    } catch (e) {
+      this.setState({ searchStatus: 'City not found' });
     }
-    else {
-      this.setState(() => ({
-        searchStatus: 'City not found'
-      }));
-    }
-  }
+  };
 
   // Method that's being triggered for searching weather
   onSearchWeather = () => {
-    this.setState(() => ({ searchQuery: '' }));
-    try {
-      if (this.state.searchQuery.length !== 0) {
-        this.searchCityWeather();
-      }
-    } catch(e) {
-      console.log('Unabled to fetch weather');
-    } 
-  }
+    this.setState({ 
+      searchQuery: '',
+      isSearching: true 
+    });
+    if (this.state.searchQuery.length !== 0) {
+      this.searchCityWeather();
+    }
+  };
 
   // Celcius/Fahrenheit toggler
   onControlClick = () => {
     const ball = this.toggleBall;
-    this.setState((prevState) => ({ isCelcius: !prevState.isCelcius }))
+    this.setState({ isCelcius: !this.state.isCelcius });
     ball.classList.toggle('isFahrenheit');
   };
 
+  /* eslint-disable no-return-assign */
   render() {
-    if (this.state.loaded) {
-      return (
-        <div className={this.state.loaded ? 'container loaded' : null}>
-          <div className="app-content">
+    const { 
+      loaded,
+      searchQuery,
+      city,
+      country,
+      countryCode,
+      isCelcius,
+      tempCelcius,
+      tempFahrenheit,
+      weatherDescription,
+      windSpeed,
+      humidity,
+      displayTime,
+      weatherIconCode,
+      searchStatus,
+      isSearching
+    } = this.state;
+    const countryFlagsUrl = 'https://www.countryflags.io/';
+
+    return (
+      <React.Fragment>
+        {loaded ? (
+          <div className={loaded ? 'container loaded' : null}>
+            <div className="app-content">
               <div className="wrapper">
                 <div className="app-header">
                   <h1>React JS Weather App</h1>
                   <br/>
                   <div className="field-wrapper">
                     <div className="text-field-wrapper">
-                      <input type="text" 
-                          onChange={this.onSearchQueryChange}
-                          value={this.state.searchQuery}
-                          placeholder="Search for <City,Country>"
+                      <input 
                           className="form-control"
+                          onChange={this.onSearchQueryChange}
                           onKeyDown={this.onKeyStroke}
+                          placeholder="Search for <City,Country>"
+                          type="text" 
+                          value={searchQuery}
                       />
-                      <div></div>
                     </div>
-                      <button 
-                        onClick={this.onSearchWeather}
+                    <button 
                         className="form-control"
-                      >
-                        Search
-                      </button>
+                        onClick={this.onSearchWeather}
+                    >
+                      Search
+                    </button>
                   </div>
                 </div>
-              {!this.state.searchStatus ? (   
+                {!isSearching ? (
                   <div>
                     <div className="location">
-                      <h3>{this.state.city}, {this.state.countryCode[this.state.country]}</h3>
-                      <img src={`${countryFlagsUrl}/${this.state.country}/shiny/64.png`} alt=""/>
+                      <h3>{city}, {countryCode[country]}</h3>
+                      <img src={`${countryFlagsUrl}/${country}/shiny/64.png`} alt=""/>
                     </div>
                     <div className="weather">
-                      <i className={`wi ${wiIcons[this.state.weatherIconCode]}`}></i>
+                      <WeatherIcon iconCode={weatherIconCode} />
                       <div className="temperature-info">
-                        <h1>{this.state.isCelcius ? this.state.tempCelcius + ' °C' : this.state.tempFahrenheit + ' °F'} </h1>
-                        <h4 style={{textTransform: 'capitalize'}}>Weather: {this.state.weatherDescription}</h4>
-                        <h4>Wind Speed: {this.state.windSpeed} km/h</h4>
-                        <h4>Humidity: {this.state.humidity}%</h4>
+                        <h1>{isCelcius ? `${tempCelcius} °C` : `${tempFahrenheit} °F`} </h1>
+                        <h4 style={{textTransform: 'capitalize'}}>
+                          Weather: {weatherDescription}
+                        </h4>
+                        <h4>Wind Speed: {windSpeed} km/h</h4>
+                        <h4>Humidity: {humidity}%</h4>
                         <div className="display-time">
-                          <h2>{this.state.displayTime}</h2>
-                          <span>{this.state.city}'s current date and time</span>
+                          <h2>{displayTime}</h2>
+                          <span>{city}'s current date and time</span>
                         </div>
-                        <div className="temperature-control" ref={(node) => this.toggleBall = node}>
+                        <div 
+                            className="temperature-control" 
+                            ref={node => this.toggleBall = node}
+                        >
                           <span>°C</span>
-                            <div className="temperature-toggle" onClick={this.onControlClick}>
-                              <div className="toggle-ball"></div>
+                            <div 
+                                className="temperature-toggle" 
+                                onClick={this.onControlClick}
+                            >
+                              <div className="toggle-ball"/>
                             </div>
                           <span>°F</span>
                         </div>
@@ -251,20 +238,20 @@ export default class WeatherApp extends Component {
                     </div>
                   </div>
                 ) : (
-                  <p>{this.state.searchStatus}</p>
+                  <div></div>
                 )}
+                {searchStatus && (   
+                  <p>{searchStatus}</p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className={"loading"}>
-          <div className="loader"></div>
-        </div>
-      );
-    }
+        ) : (
+          <div className={'loading'}>
+            <div className='loader'></div>
+          </div>
+        )}
+      </React.Fragment>
+    );
   }
-  
 }
-
