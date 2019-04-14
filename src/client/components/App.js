@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import 'moment-timezone';
 
-import WeatherIcon from './WeatherIcon';
 import DailyForecast from './DailyForecast';
+import Weather from './Weather';
+import Header from './Header';
+import Loader from './Loader';
+import SearchEmpty from './SearchEmpty';
 
 import { 
   fetchCountryCode, 
-  fetchWeather,
   fetchForecast, 
   fetchCurrentLocationAndWeather
 } from '../api/api';
@@ -15,25 +17,25 @@ import {
 export default class WeatherApp extends Component {
   state = {
     country: '',
+    countryCode: {},
     city: '',
+    displayTime: '',
+    forecast:[],
+    humidity: '',
+    isCelcius: true,
+    isSearching: false,
     lat: '',
+    loaded: false,
     lon: '',
     tempCelcius: '',
     tempFahrenheit: '',
-    isCelcius: true,
     weather: '',
     weatherDescription: '',
-    humidity: '',
     windSpeed: '',
     weatherIconCode: '',
     searchQuery: '',
     searchStatus: undefined,
-    countryCode: {},
-    forecast:[],
-    displayTime: '',
-    zoneName: '',
-    isSearching: false,
-    loaded: false
+    zoneName: ''
   };
 
   componentDidMount() {
@@ -46,50 +48,43 @@ export default class WeatherApp extends Component {
   }
 
   fetchUserLocation = async () => {
-    const data = await fetchCurrentLocationAndWeather();
-    const forecast = await fetchForecast(data.weather.coord.lat, data.weather.coord.lon);
-
-    this.setCurrentWeather(data.weather, data.location.city);
+    const weather = await fetchCurrentLocationAndWeather();
     
-    this.setState({ 
-      forecast: forecast.data,
-      zoneName: forecast.timezone,
-      loaded: true 
-    });
-
-    this.displayCurrentTime();
+    this.setCurrentWeather(weather);
   };
 
   // Fetch country code json file
   setCountryCode = async () => {
-    if ('localStorage' in window && localStorage.countryCode) {
-      if (Object.keys(localStorage.countryCode).length === 0) {
-        const countryCodeStore = JSON.parse(localStorage.getItem('countryCode'));
-        this.setState(() => ({ countryCode: countryCodeStore }));
-      } else {
-        const countryCode = await fetchCountryCode();
-        localStorage.setItem('countryCode', JSON.stringify(countryCode));
+    if (localStorage.countryCode && Object.keys(localStorage.countryCode).length === 0) {
+      const countryCodeStore = JSON.parse(localStorage.getItem('countryCode'));
+      this.setState(() => ({ countryCode: countryCodeStore }));
+    } else {
+      const countryCode = await fetchCountryCode();
+      localStorage.setItem('countryCode', JSON.stringify(countryCode));
 
-        this.setState(() => ({ countryCode }));
-      }
+      this.setState(() => ({ countryCode }));
     } 
   };
 
-  setCurrentWeather = (data, city) => {
+  setCurrentWeather = (weather) => {
     this.setState({
-      city,
-      country: data.sys.country,
-      lat: data.coord.lat,
-      lon: data.coord.lon,
-      tempCelcius: Math.round(data.main.temp),
-      tempFahrenheit: Math.round((data.main.temp * (9/5)) + 32),
-      weather: data.weather[0].main,
-      humidity: data.main.humidity,
-      windSpeed: data.wind.speed,
-      weatherDescription: data.weather[0].description,
-      weatherIconCode: data.weather[0].icon,
+      city: weather.city_name,
+      country: weather.country_code,
+      lat: weather.lat,
+      lon: weather.lon,
+      tempCelcius: Math.round(weather.data[0].temp),
+      tempFahrenheit: Math.round((weather.data[0].temp * (9/5)) + 32),
+      weather: weather.data[0].weather.description,
+      humidity: weather.data[0].rh,
+      windSpeed: weather.data[0].wind_spd.toFixed(2),
+      weatherDescription: weather.data[0].weather.description,
+      weatherIconCode: weather.data[0].weather.icon,
+      displayTime: weather.timezone ? moment().tz(weather.timezone).format('LLLL') : '',
       searchStatus: undefined,
-      isSearching: false 
+      isSearching: false, 
+      forecast: weather.data,
+      zoneName: weather.timezone,
+      loaded: true 
     });
   }
 
@@ -108,39 +103,29 @@ export default class WeatherApp extends Component {
     }
   }
 
-  // Display current time based on timezone
-  displayCurrentTime = () => {
-    if (this.state.zoneName) {
-      const time = moment().tz(this.state.zoneName).format('LLLL');
-      this.setState({ displayTime: time });
-    }
-  }
-
   // Http request Search <city,country> current weather
   searchCityWeather = async () => {
     try {
-      const { searchQuery } = this.state;
-      const weather = await fetchWeather(undefined, undefined, searchQuery);
-      const forecast = await fetchForecast(weather.coord.lat, weather.coord.lon);
+      const weather = await fetchForecast(this.state.searchQuery);
 
-      this.setCurrentWeather(weather, weather.name);
-      this.displayCurrentTime();
-      this.setState({ 
-        forecast: forecast.data,
-        zoneName: forecast.timezone 
-      });
+      this.setCurrentWeather(weather);
     } catch (e) {
-      this.setState({ searchStatus: 'City not found' });
+      this.setState({ 
+        searchStatus: 'Location not found',
+        isSearching: false 
+      });
     }
   };
 
   // Method that's being triggered for searching weather
   onSearchWeather = () => {
-    this.setState({ 
-      searchQuery: '',
-      isSearching: true 
-    });
-    if (this.state.searchQuery.length !== 0) {
+    const { searchQuery, isSearching } = this.state;
+
+    if (searchQuery.length !== 0 && !isSearching) {
+      this.setState({ 
+        isSearching: true,
+        searchStatus: undefined 
+      });
       this.searchCityWeather();
     }
   };
@@ -155,104 +140,48 @@ export default class WeatherApp extends Component {
     const { 
       loaded,
       searchQuery,
-      city,
-      country,
-      countryCode,
       isCelcius,
-      tempCelcius,
-      tempFahrenheit,
-      weatherDescription,
-      windSpeed,
-      humidity,
-      displayTime,
-      weatherIconCode,
       searchStatus,
       forecast,
       isSearching
     } = this.state;
-    const countryFlagsUrl = 'https://www.countryflags.io/';
-
+   
     return (
       <React.Fragment>
         {loaded ? (
-          <div className={loaded ? 'container loaded' : null}>
+          <div className="container">
+            <Header 
+                isSearching={isSearching}
+                onChange={this.onSearchQueryChange}
+                onKeyDown={this.onKeyEnter}
+                onSearchWeather={this.onSearchWeather}
+                searchQuery={searchQuery}
+            />
             <div className="app-content">
-              <div className="app-header">
-                <h1>React JS Weather App</h1>
-                <br/>
-                <div className="field-wrapper">
-                  <div className="text-field-wrapper">
-                    <input 
-                        className="form-control"
-                        onChange={this.onSearchQueryChange}
-                        onKeyDown={this.onKeyEnter}
-                        placeholder="Search for <City,Country>"
-                        type="text" 
-                        value={searchQuery}
+              {(!isSearching && !searchStatus) && (
+                <React.Fragment>
+                  <Weather 
+                      onToggle={this.onToggleFahrenheit}
+                      weather={this.state} 
+                  />
+                  {forecast.length !== 0 && (
+                    <DailyForecast 
+                        forecast={forecast} 
+                        isCelcius={isCelcius}
                     />
-                  </div>
-                  <button 
-                      className="form-control"
-                      onClick={this.onSearchWeather}
-                  >
-                    Search
-                  </button>
-                </div>
-              </div>
-              <div className="wrapper">
-                {!isSearching ? (
-                  <React.Fragment>
-                    <div className="weather">
-                      <div className="weather-wrapper">
-                        <WeatherIcon iconCode={weatherIconCode} />
-                        <div className="temperature-control">
-                          <h1 className="weather-temp">
-                            {isCelcius ? `${tempCelcius} °C` : `${tempFahrenheit} °F`} 
-                          </h1>
-                            <div 
-                                className="temperature-toggle" 
-                                onClick={this.onToggleFahrenheit}
-                                style={{
-                                  color: isCelcius ? 'rgba(255, 255, 255, .7)' : '#adff2f'
-                                }}
-                            >
-                              <span>{isCelcius ? '°F' : '°C' }</span>
-                            </div>
-                        </div>
-                      </div>
-                      <div className="temperature-info">
-                        <div className="location">
-                          <h2>{city}, {countryCode[country]}</h2>
-                          <img src={`${countryFlagsUrl}/${country}/shiny/64.png`} alt=""/>
-                        </div>
-                        <h4 style={{textTransform: 'capitalize'}}>
-                          <span>Weather:</span> {weatherDescription}
-                        </h4>
-                        <h4><span>Wind Speed:</span> {windSpeed} km/h</h4>
-                        <h4><span>Humidity:</span> {humidity}%</h4>
-                        <h4><span>Date:</span> {displayTime}</h4>
-                      </div>
-                    </div>
-                    {forecast.length !== 0 && (
-                      <DailyForecast 
-                          forecast={forecast} 
-                          isCelcius={isCelcius}
-                      />
-                    )}
-                  </React.Fragment>
-                ) : (
-                  <div></div>
-                )}
-                {searchStatus && (   
-                  <p>{searchStatus}</p>
-                )}
-              </div>
+                  )}
+                </React.Fragment>
+              )}
+              {(isSearching && !searchStatus) && (
+                <Loader />
+              )}
+              {searchStatus && (   
+                <SearchEmpty searchStatus={searchStatus}/>
+              )}
             </div>
           </div>
         ) : (
-          <div className={'loading'}>
-            <div className='loader'></div>
-          </div>
+          <Loader />
         )}
       </React.Fragment>
     );

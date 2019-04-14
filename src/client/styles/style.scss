@@ -1,6 +1,31 @@
+/*
+ ---------------
+ Variables
+*/
 @import './base/settings';
+
+/*
+ ---------------
+ Mixins / Functions
+*/
+@import './mixins/mixins';
+
+/*
+---------------
+Base 
+*/
 @import './base/base';
+
+/*
+ ---------------
+ Components
+*/
 @import './components/loader';
 @import './components/header';
 @import './components/content';
-@import './responsive/smartphone';
+
+/*
+ ---------------
+ Utils 
+*/
+@import './utils/animation';

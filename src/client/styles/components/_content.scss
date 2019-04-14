@@ -2,33 +2,42 @@
   width: 70%;
   display: flex;
   justify-content: center;
-  align-items: center;
   flex-direction: column;
+  align-items: center;
   margin: auto;
-  margin-top: $s-size;
+  margin-top: 10rem;
+  padding: $xl-size;
+  text-align: left;
+
+  @media (max-width: $tablet) {
+    width: 100%;
+  }
+
+  @media (max-width: $mobile) {
+    padding: $l-size;
+    padding-bottom: $xl-size;
+  }
 }
 
 .location {
   display: flex;
   align-items: center;
 
+  @media (max-width: $mobile) {
+    border-bottom: 1px solid rgba(255,255,255, .2);
+  }
+
   img {
     width: 30px;
     height: 30px;
     margin-left: $m-size;
-
   }
-}
 
-.wrapper { 
-  width: 100% !important;
-  display: flex;
-  flex-direction: column;
-  padding: $xl-size;
-  text-align: left;
-  width: inherit;
-  padding-top: 0;
- 
+  h2 {
+    @media (max-width: $mobile) {
+      font-size: 2rem;
+    }
+  }
 }
 
 .location {
@@ -40,23 +49,50 @@
   display: flex;
   align-items: center;
   margin-top: $m-size;
+  @include animation(fadein, .5s);
+
+  @media (max-width: $mobile) {
+    flex-direction: column;
+  }
 
   i {
     font-size: 15rem;
     flex-grow: 1;
+
+    @media (max-width: $mobile) {
+      font-size: $xxl-size;
+      flex-grow: 0;
+      order: 2;
+    }
   }
 }
 
 .weather-wrapper {
   display: flex;
   flex-direction: column;
-  padding-right: $xxl-size;
+  padding: 0 $xxl-size;
   text-align: center;
   position: relative;
+
+  @media (max-width: $tablet) {
+    padding-left: 0;
+    padding-right: $m-size;
+  }
+
+  @media (max-width: $mobile) {
+    padding: 0;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+  }
 }
 
 .weather-temp {
   font-size: $xl-size;
+  
+  @media (max-width: $mobile) {
+    order: 1;
+  }
 }
 
 .temperature-info {
@@ -71,11 +107,20 @@
       margin-right: $s-size;
     }
   }
+
+  @media (max-width: $mobile) {
+    width: 100%;
+    padding-left: 0;
+  }
 }
 
 .temperature-control {
   position: relative;
   text-align: right;
+
+  @media (max-width: $mobile) {
+    margin-right: $xl-size;
+  }
 
   span {
     padding: 0 $s-size;
@@ -88,7 +133,7 @@
   border-radius: 5px;
   background: rgba(0,0,0,.2);
   position: absolute;
-  top: 20px;
+  top: 10px;
   right: -30px;
   display: flex;
   align-items: center;
@@ -118,19 +163,6 @@
   &:focus {
     outline: none;
   }
-
-
-}
-
-
-input {
-  padding-bottom: $s-size;
-  border-bottom: 1px solid rgba(255,255,255,.4) !important;
-  position: relative;
-
-  &:focus +  div {
-    width: 100%;
-  }
 }
 
 .text-field-wrapper {
@@ -150,17 +182,17 @@ input {
 
 }
 
-button {
-  margin: 0 $l-size;
-  font-size: 3rem;
-
-}
-
 .forecast {
   width: 100%;
   display: flex;
   justify-content: space-between;
   margin-top: $xl-size;
+  @include animation(fadein, .5s);
+
+  @media (max-width: $mobile) {
+    flex-direction: column;
+    margin-top: 0;
+  }
 }
 
 .forecast__item {
@@ -174,6 +206,18 @@ button {
 
   i {
     font-size: $icon-l;
+
+    @media (max-width: $mobile) {
+      font-size: $xl-size;
+      order: 2;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    flex-direction: row;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, .1);
+    padding: $m-size 0;
   }
 }
 
@@ -184,10 +228,19 @@ button {
 .forecast-date {
   font-weight: normal;
   margin-bottom: 0;
+
+  @media (max-width: $mobile) {
+    order: 1;
+    margin: 0;
+  }
 }
 
 .forecast-temp {
   span {
     font-weight: normal;
+  }
+
+  @media (max-width: $mobile) {
+    order: 3;
   }
 }

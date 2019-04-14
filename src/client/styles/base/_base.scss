@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 html {
     font-size: 62.5%;
 }
@@ -5,9 +9,20 @@ html {
 body {
     font-family: 'Roboto', sans-serif;
     font-size: 1.6rem;
-    padding: $l-size;
     background: $purple;
     color: #fff;
+}
+
+button {
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 0 $m-size;
+    margin: 0 $s-size;
+    border: none;
+}
+
+button:disabled {
+    opacity: .5;
 }
 
 button:hover {
@@ -18,6 +33,18 @@ button:focus {
     outline: none;
 }   
 
+
+input {
+    border: 1px solid rgba(255,255,255,.4) !important;
+    position: relative;
+    padding: $s-size;
+  
+    &:focus {
+      border: 1px solid rgba(255,255,255,.7) !important;
+    }
+}
+
+  
 input::placeholder {
     color: rgba(255,255,255,.7) !important;
 }

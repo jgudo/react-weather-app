@@ -17,9 +17,7 @@ const DailyForecast = ({ forecast, isCelcius }) => {
   return (
     <div className="forecast">
       {forecast.map((data, index) => {
-        const date = moment(data.datetime).format('MMMM Do YYYY, h:mm:ss a');
         const dayCode = moment(data.datetime).day();
-        console.log(date, day[dayCode]);
         return index !== 0 && (
           <div 
               className="forecast__item"
